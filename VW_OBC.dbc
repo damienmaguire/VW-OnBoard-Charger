@@ -36,18 +36,14 @@ BS_:
 BU_:
 
 
-BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
- SG_ OBC_ACVolt_L2 : 0|8@1- (1,0) [0|0] "Vac" Vector__XXX
-
 BO_ 2617123335 OBC_Input_L2: 8 Vector__XXX
- SG_ OBC_ACVolt_L1 : 16|8@1- (1,0) [0|0] "Vac" Vector__XXX
+ SG_ OBC_ACVolt_L2 : 16|8@1+ (1,0) [0|0] "Vac" Vector__XXX
 
 BO_ 2617123334 OBC_Input_L1: 8 Vector__XXX
- SG_ OBC_ACVolt_L1 : 16|8@1- (1,0) [0|0] "Vac" Vector__XXX
+ SG_ OBC_ACVolt_L1 : 16|8@1+ (1,0) [0|0] "Vac" Vector__XXX
 
 
 
-CM_ BO_ 3221225472 "This is a message for not used signals, created by Vector CANdb++ DBC OLE DB Provider.";
 BA_DEF_  "BusType" STRING ;
 BA_DEF_DEF_  "BusType" "CAN";
 
