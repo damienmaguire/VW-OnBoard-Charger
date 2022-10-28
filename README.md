@@ -18,4 +18,10 @@ ID 0x1BFE2206 on HYB CAN seems to contain AC Mains L1 - N voltage
 ID 0x1BFE2207 on HYB CAN seems to contain AC Mains L2 - N voltage
 
 
+Charger #2 From a Golf PHEV part number : 5QE915682AK
+
+Two CAN busses running at 500kbps.
+
+No wake up required.
+
 
