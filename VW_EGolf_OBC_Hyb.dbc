@@ -39,6 +39,7 @@ BU_:
 BO_ 2147485310 OBC_Mes3: 8 Vector__XXX
 
 BO_ 2147485028 OBC_Mes2: 8 Vector__XXX
+ SG_ OBC_HV_Voltage : 24|10@1+ (1,0) [0|0] "V" Vector__XXX
 
 BO_ 2147484555 OBC_Mes1: 8 Vector__XXX
 
