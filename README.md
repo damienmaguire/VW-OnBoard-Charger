@@ -24,4 +24,8 @@ Two CAN busses running at 500kbps.
 
 No wake up required.
 
+20/11/22 : Added a very crude arduino due sketch to run the phev charger. Fails after a few seconds.
+-Added CAN log from one such test.
+-Video with details released soon.
+
 
