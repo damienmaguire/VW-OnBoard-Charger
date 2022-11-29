@@ -35,6 +35,7 @@ byte time500MS=5;
 byte chg_amps=0x00;
 float Version=1.00;
 uint16_t BMSAmps=0;
+uint16_t BMSVolts=0;
 
 struct ChargerStatus {
   uint16_t ACvoltage = 0;
@@ -92,22 +93,23 @@ void Msgs10ms()                       //10ms messages here
         outframe.extended = 0;          //
         outframe.rtr=1;                 //
         BMSAmps=(charger_status.current+511)*4;
+        BMSVolts=(charger_status.HVVoltage)*4;
         //BMSAmps=(3+511)*4;
         outframe.data.bytes[0]=0x00;
         outframe.data.bytes[1]=((BMSAmps&0xf)<<4|vag_cnt097);//BMS reported current. 0xc7f=0A.
         outframe.data.bytes[2]=(BMSAmps>>4)&0xff;//BMS reported current. 0xc7f=0A.
-        outframe.data.bytes[3]=0xCF;//BMS Reported voltage.0x5cf=371V.12bits unsigned.
+        outframe.data.bytes[3]=BMSVolts&0xff;//0xCF;//BMS Reported voltage.0x5cf=371V.12bits unsigned.
                                     //BMS Reported voltage. BMS mode. 0=HV inactive , 1=Drive hv active, 2=balancing, 3=external charging, 4=AC charge,5=Error, 6=DC Charge, 7=Init.
         if(charger_params.active)
         {
-          if(msg097==0) outframe.data.bytes[4]=0x45;//hv up for AC charge
-          else outframe.data.bytes[4]=0x15;//hv up for drive
+          if(msg097==0) outframe.data.bytes[4]=(0x4<<4)|(BMSVolts>>8&0xf);//hv up for AC charge
+          else outframe.data.bytes[4]=(0x1<<4)|(BMSVolts>>8&0xf);//0x15;//hv up for drive
           if(msg097!=0) msg097--;
         }
         
         if(!charger_params.active)
         {
-          outframe.data.bytes[4]=0x05;
+          outframe.data.bytes[4]=(0x0<<4)|(BMSVolts>>8&0xf);//0x05;
           msg097=0x09;
         } 
         outframe.data.bytes[5]=0x03;
@@ -174,7 +176,7 @@ void Msgs100ms()                      ////100ms messages here
           outframe.data.bytes[1]=vag_cnt;
           outframe.data.bytes[7]=msg187_1;//ramp here for some reason??
         }
-        outframe.data.bytes[2]=0x12;
+        outframe.data.bytes[2]=0x12;//gear pos.0x2=p,0x3=r,0x4=n,0x5=d,0x6=d.
         outframe.data.bytes[3]=0x00;
         outframe.data.bytes[4]=0x00;
         outframe.data.bytes[5]=0x00;
@@ -223,18 +225,34 @@ void Msgs100ms()                      ////100ms messages here
             vag_cnt3AF++;
         if(vag_cnt3AF>0x0f) vag_cnt3AF=0x00; 
 
+        outframe.id = 0x3DB;            //gateway msg
+        outframe.length = 8;            //
+        outframe.extended = 0;          //
+        outframe.rtr=1;                 //
+        outframe.data.bytes[0]=0xff;
+        outframe.data.bytes[1]=0x03;
+        outframe.data.bytes[2]=0x01;
+        outframe.data.bytes[3]=0x20;
+        outframe.data.bytes[4]=0x03;
+        outframe.data.bytes[5]=0x20;
+        outframe.data.bytes[6]=0x00;
+        outframe.data.bytes[7]=0x72;
+        Can0.sendFrame(outframe);  
+
+
         outframe.id = 0x489;            //BMS MSG. When used will cause cp to lock.
         outframe.length = 8;            //Will try as a static for now...
         outframe.extended = 0;          //
         outframe.rtr=1;                 //
         outframe.data.bytes[0]=0x00;
-        outframe.data.bytes[1]=vag_cnt489;
-        outframe.data.bytes[2]=0x00;
-        outframe.data.bytes[3]=0xF4;
-        outframe.data.bytes[4]=0x25;
-        outframe.data.bytes[5]=0xCE;
-        outframe.data.bytes[6]=0x2F;
-        outframe.data.bytes[7]=0x00;
+        outframe.data.bytes[1]=vag_cnt489;//ccs related
+        outframe.data.bytes[2]=0x00;//ccs related
+        outframe.data.bytes[3]=0xF4;//static byte
+        outframe.data.bytes[4]=0x25;//ramps from 0x25 to 0x55 smoothly
+        outframe.data.bytes[5]=0x0E;//very busy with lots of roll overs to 255. ramps early on. mostly 
+                                    //mostly 0xe,0x2e,0x4e. low nibble always e.
+        outframe.data.bytes[6]=0x31;//busy. maybe related to byte 5. mostly 0x31 , 0x30
+        outframe.data.bytes[7]=0x00;//always 0.
         outframe.data.bytes[0]=vw_crc_calc(outframe.data.bytes, outframe.length, outframe.id);
         Can0.sendFrame(outframe);    //
             vag_cnt489++;
@@ -249,7 +267,7 @@ void Msgs100ms()                      ////100ms messages here
         outframe.data.bytes[0]=0x00;
         outframe.data.bytes[1]=((charger_params.HVDCSetpnt&0xF)<<4)|vag_cnt6A3;
         outframe.data.bytes[2]=(charger_params.HVDCSetpnt>>4)&0x3F;
-        outframe.data.bytes[3]=0x3E;
+        outframe.data.bytes[3]=0x00;//0x3E;//min charge voltage
         outframe.data.bytes[4]=0x6C;
         outframe.data.bytes[5]=0x66;
         outframe.data.bytes[6]=0x03;
