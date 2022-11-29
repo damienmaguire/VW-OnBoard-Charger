@@ -30,4 +30,10 @@ No wake up required.
 
 -Video with details released soon.
 
+29/11/22 : Arduino Due sketch updated. Now runs charger without errors.
+
+https://vimeo.com/767048993
+
+https://vimeo.com/773013251
+
 
