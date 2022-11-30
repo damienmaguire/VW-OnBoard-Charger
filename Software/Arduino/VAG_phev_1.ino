@@ -36,6 +36,7 @@ byte chg_amps=0x00;
 float Version=1.00;
 uint16_t BMSAmps=0;
 uint16_t BMSVolts=0;
+bool UnLock=false;
 
 struct ChargerStatus {
   uint16_t ACvoltage = 0;
@@ -225,18 +226,33 @@ void Msgs100ms()                      ////100ms messages here
             vag_cnt3AF++;
         if(vag_cnt3AF>0x0f) vag_cnt3AF=0x00; 
 
-        outframe.id = 0x3DB;            //gateway msg
+        outframe.id = 0x3DD;            //gateway msg
         outframe.length = 8;            //
         outframe.extended = 0;          //
         outframe.rtr=1;                 //
-        outframe.data.bytes[0]=0xff;
-        outframe.data.bytes[1]=0x03;
-        outframe.data.bytes[2]=0x01;
-        outframe.data.bytes[3]=0x20;
-        outframe.data.bytes[4]=0x03;
-        outframe.data.bytes[5]=0x20;
+        if(UnLock)
+        {
+        outframe.data.bytes[0]=0x59;
+        outframe.data.bytes[1]=0x96;
+        outframe.data.bytes[2]=0x20;
+        outframe.data.bytes[3]=0x00;
+        outframe.data.bytes[4]=0xfe;
+        outframe.data.bytes[5]=0x00;
+        outframe.data.bytes[6]=0x0e;
+        outframe.data.bytes[7]=0x00;
+        }
+        else
+        {
+        outframe.data.bytes[0]=0xfb;
+        outframe.data.bytes[1]=0x1f;
+        outframe.data.bytes[2]=0x20;
+        outframe.data.bytes[3]=0x00;
+        outframe.data.bytes[4]=0xfe;
+        outframe.data.bytes[5]=0x00;
         outframe.data.bytes[6]=0x00;
-        outframe.data.bytes[7]=0x72;
+        outframe.data.bytes[7]=0x00; 
+        }
+
         Can0.sendFrame(outframe);  
 
 
@@ -396,7 +412,10 @@ void checkforinput()
            
           case 's':     //Deactivate charger     
               DeactivateCharger();
-            break;            
+            break;   
+          case 'u':     //Unlock charge port     
+              UnLockCP();
+            break;          
            
 
           case '?':     //Print a menu describing these functions
@@ -447,7 +466,12 @@ void DeactivateCharger()
     SerialDEBUG.println("Charger deactivated");
 }
 
-
+void UnLockCP()
+{
+  UnLock=!UnLock;//toggle lock status
+  if(UnLock) SerialDEBUG.println("Unlock Requested");
+  else SerialDEBUG.println("Unlock Not Requested");
+}
 void printMenu()
 {
    SerialDEBUG<<"\f\n=========== EVBMW VW Charger Controller "<<Version<<" ==============\n************ List of Available Commands ************\n\n";
@@ -457,7 +481,8 @@ void printMenu()
    SerialDEBUG<<"  i  - Set max HV Current e.g. typing i5 followed by enter sets max current to 5Amps\n ";
    SerialDEBUG<<"  q  - Set max HV Voltage e.g. typing q400 followed by enter sets max HV Voltage to 400Volts\n ";
    SerialDEBUG<<"  a  - Activate charger.\n ";
-   SerialDEBUG<<"  s  - Deactivate charger.\n ";   
+   SerialDEBUG<<"  s  - Deactivate charger.\n ";  
+   SerialDEBUG<<"  u  - Toggle CP unlock Request.\n ";  
    SerialDEBUG<<"**************************************************************\n==============================================================\n\n";
    
 }
